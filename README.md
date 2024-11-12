@@ -35,3 +35,22 @@ auto add(T a, U b) -> decltype(a + b) {
 }
 같이 함수의 반환타입을 표현식에 따라 자동으로 추론이 가능하다.
 
+## 2. 스마트 포인터
+스마트 포인터는 memory헤더에 포함되어있다
+### 1.1 unique_ptr
+#### 1.1.1 unique_ptr 특징
+unique_ptr은 단독 소유를 보장하는 스마트 포인터로 한 시점에 하나의 객체만 가리킬수있다
+소유권을 다른 unique_ptr로 이전할수있지만 복사는 불가능하다.
+std::unique_ptr<int> ptr1 = std::make_unique<int>(10);  // 새로운 int(10) 생성 및 소유
+std::unique_ptr<int> ptr2 = std::move(ptr1);            // ptr1에서 ptr2로 소유권 이전
+// ptr1은 더 이상 유효하지 않음
+**std::make_unique는 c++14에 추가된 함수다**
+#### 1.1.2 unique_ptr 생성자
+1. 기본생성자 std::unique_ptr<int> ptr; // ptr은 nullptr을 가르킨다
+2. 원시 포인터를 생성자에 직접 전달 int* x = new int(10); std::unique_ptr<int> ptr(x);
+** 원시포인터를 직접 전당하면 다른코드에서 delete x;를 호출할 가능성이 있어 포인터가 이중삭제될 위험성이 있어 쓰지않는게 좋다**
+3. 소유할 객체를 받아들이는 생성자 std::unique_ptr<int> ptr(new int(10));  // int(10)을 가리키는 unique_ptr 생성
+4. 이동 생성자 std::unique_ptr<int> ptr2 = std::move(ptr1);  // ptr1에서 ptr2로 소유권 이동 이때 ptr1은 유니크포인터여야한다
+5. 커스텀 삭제자를 받는 생성자
+커스텀 삭제자를 사용 하는 이유는 파일이나 소켓 데이터베이스등 의 자원은 단순히 delete로 메모리 헤제가 불가능하므로 커스텀 삭제자를 이용하여야 한다
+예를 들어 fopen으로 파일포인터를 유니크 포인터로 지정했을경우 delte가 아닌 fclose함수로 파일을 닫아주어야한다
